@@ -35,10 +35,10 @@ app.use(bodyParser.urlencoded({ extended: true }));
 // Routes
 const teacherRoutes = require('./routes/teacherRoutes');
 const studentRoutes = require('./routes/studentRoutes');
-const authRoutes = require('./Routes/authRoutes');
+const authRoutes = require('./routes/authRoutes');
 const protectedRoutes = require('./routes/protectedRoutes');
 const spreadsheetRoutes = require('./Routes/spreadsheetRoutes');
-const chartRoutes = require('./Routes/chartRoutes');
+const chartRoutes = require('./routes/chartRoutes');
 
 
 app.use('/teacher', teacherRoutes);
