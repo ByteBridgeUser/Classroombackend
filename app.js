@@ -37,7 +37,7 @@ const teacherRoutes = require('./routes/teacherRoutes');
 const studentRoutes = require('./routes/studentRoutes');
 const authRoutes = require('./routes/authRoutes');
 const protectedRoutes = require('./routes/protectedRoutes');
-const spreadsheetRoutes = require('./Routes/spreadsheetRoutes');
+const spreadsheetRoutes = require('./routes/spreadsheetRoutes');
 const chartRoutes = require('./routes/chartRoutes');
 
 
