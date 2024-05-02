@@ -214,10 +214,22 @@ exports.fetchAttendance = async (req, res) => {
       const googleSheets = google.sheets({ version: "v4", auth: client });
 
       // Read rows from the spreadsheet for the class
-      const response = await googleSheets.spreadsheets.values.get({
-        spreadsheetId,
-        range: "Sheet1", // Update with your sheet name or range
-      });
+      let response;
+      try {
+        response = await googleSheets.spreadsheets.values.get({
+          spreadsheetId,
+          range: "Sheet1", // Update with your sheet name or range
+        });
+      } catch (error) {
+        console.warn(`Error fetching attendance data for class ${cls._id}:`, error.message);
+        continue; // Skip processing this class if there's an error fetching data
+      }
+
+      // Check if the response contains valid data
+      if (!response.data || !response.data.values || response.data.values.length === 0) {
+        console.warn(`No valid attendance data found for class ${cls._id} in Sheet1`);
+        continue; // Skip processing this class if no valid data is found
+      }
 
       // Convert attendance data into an object with roll numbers as keys
       const [headers, ...rows] = response.data.values;
@@ -225,7 +237,7 @@ exports.fetchAttendance = async (req, res) => {
 
       if (rollNoIndex === -1) {
         console.warn('Roll number column not found in attendance data for class:', cls._id);
-        continue; // Skip processing this class
+        continue; // Skip processing this class if roll number column is not found
       }
 
       const rollNoToAttendance = {};
@@ -235,8 +247,14 @@ exports.fetchAttendance = async (req, res) => {
         rollNoToAttendance[rollNo] = row.slice(1); // Exclude the first element (roll number)
       }
 
+      // Check if student's roll number exists in attendance data
+      if (!(studentRollNo in rollNoToAttendance)) {
+        console.warn(`Student roll number (${studentRollNo}) not found in attendance data for class: ${cls._id}`);
+        continue; // Skip processing this class
+      }
+
       // Calculate attendance percentage for the student
-      const attendanceValues = rollNoToAttendance[studentRollNo] || Array(headers.length - 1).fill('0');
+      const attendanceValues = rollNoToAttendance[studentRollNo];
       const totalClasses = attendanceValues.length;
       const presentCount = attendanceValues.filter(value => value === 'P').length;
       const absentCount = attendanceValues.filter(value => value === 'A').length;
